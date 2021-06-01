@@ -1,0 +1,232 @@
+---
+title: Trump's Sentiment Analysis
+author: Kristián Jakubčo
+date: '2021-06-01'
+slug: []
+categories: []
+tags: []
+description: ~
+toc: yes
+authors: []
+series: []
+lastmod: '2021-06-01T11:36:11+02:00'
+featuredVideo: ~
+featuredImage: ~
+---
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+library(ggthemes)
+library(dplyr)
+library(tidytext)
+library(stringr) 
+library(ggplot2) 
+data <- read.csv("C:\\Users\\krist\\OneDrive\\Dokumenty\\R\\FINAL\\trump_tweets.csv") #loads the data
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+trump <-data[!(data$isRetweet=="t"), ] #deletes retweets
+trump <- trump %>% 
+  filter(!str_detect(text, 'https')) #deletes hyperlink
+
+tidy_trump <- trump %>%
+  mutate(line = row_number()) %>% #new column "line" to keep track from which lines words come from  
+  unnest_tokens(word, text) %>% #unnests the text into one word per row
+  anti_join(stop_words)
+
+word_freq <- tidy_trump %>%
+  count(word, sort = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+library(wordcloud)
+library(RColorBrewer)
+word_freq <- tidy_trump %>%
+  count(word, sort = TRUE) #creates a new dataset of words and their frequencies
+word_freq <- word_freq[-c(1:7), ]
+words <- word_freq$word #assigns the words to a character vector
+freqs <- word_freq$n #assigns the frequencies of the words to a vector of integers
+wordcloud(words = words,
+          freq = freqs, #the two vectors are used to make a wordcloud
+          max.words = 50, #sets the maximum number of words in the wordcloud
+          scale=c(2.5,.5), #adjusts the scale of the wordcloud so that all words can fit in
+          colors = brewer.pal(8, "Dark2"))
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+#Trump's words with joy sentiment last year
+lastyear <- tidy_trump[grepl("2020", tidy_trump$date),]
+nrc_joy <- get_sentiments("nrc") %>% 
+  filter(sentiment == "positive")
+lastyear %>%
+  inner_join(nrc_joy) %>% # combining two tables together 
+  count(word, sort = TRUE) %>%
+  slice_max(n, n = 20)
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+#Trump's words with joy sentiment last year
+lastyear <- tidy_trump[grepl("2020", tidy_trump$date),]
+nrc_joy <- get_sentiments("nrc") %>% 
+  filter(sentiment == "negative")
+lastyear %>%
+  inner_join(nrc_joy) %>% # combining two tables together 
+  count(word, sort = TRUE) %>%
+  slice_max(n, n = 20)
+  
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+#Sentiment analysis of Donald Trump's tweets in 2020
+library(sentimentr)
+library(tidyr)
+trump_sentiment <- lastyear %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(date, index = line %/% 80, sentiment) %>%
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>% 
+  mutate(sentiment = positive - negative)
+
+#Adjusting the date format and extracting months only
+library(lubridate)
+trump_sentiment <- trump_sentiment %>% mutate(date = ymd_hms(date),
+                                              newdate = as_date(date),
+                                              linenumber = row_number())
+trump_sentiment <- trump_sentiment %>% mutate(day = format(as.Date(trump_sentiment$date, format="%Y/%m/%d"), "%d/%m"))
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+#Separate datasets for every month
+January <- trump_sentiment[grepl("/01", trump_sentiment$day),]
+February <- trump_sentiment[grepl("/02", trump_sentiment$day),]
+March <- trump_sentiment[grepl("/03", trump_sentiment$day),]
+April <- trump_sentiment[grepl("/04", trump_sentiment$day),]
+May <- trump_sentiment[grepl("/05", trump_sentiment$day),]
+June <- trump_sentiment[grepl("/06", trump_sentiment$day),]
+July <- trump_sentiment[grepl("/07", trump_sentiment$day),]
+August <- trump_sentiment[grepl("/08", trump_sentiment$day),]
+September <- trump_sentiment[grepl("/09", trump_sentiment$day),]
+October <- trump_sentiment[grepl("/10", trump_sentiment$day),]
+November <- trump_sentiment[grepl("/11", trump_sentiment$day),]
+December <- trump_sentiment[grepl("/12", trump_sentiment$day),]
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(January, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("January") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
+```
+ 
+ 
+    
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(February, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("February") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
+```
+    
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(March, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("March") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
+```
+    
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(April, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("April") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
+```
+    
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(May, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("May") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(June, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("June") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
+```
+    
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(July, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("July") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
+```
+    
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(August, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("August") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
+```
+    
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(September, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("September") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
+```
+    
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(October, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("October") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
+```
+    
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(November, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("November") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
+```
+    
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+library(tidyverse)
+ ggplot(December, aes(day, sentiment, fill = ifelse(sentiment > 0,"positive","negative"))) +
+      ggtitle("December") +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face='bold', margin=margin(t=40,b=-30))) +
+      geom_bar(stat="identity") +
+      scale_fill_manual(values=c("firebrick1","chartreuse3"), name="Sentiment") 
