@@ -47,6 +47,3 @@ widget:
 
 Hello
 
-## Details  
-
-Hello
