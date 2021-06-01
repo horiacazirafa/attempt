@@ -3,20 +3,20 @@ title:
 draft: false
 role: Student at
 avatar: images/icon.png
-bio: Aenean vel bibendum quam. Aliquam at mollis quam. Proin efficitur.
+bio: An evolutionary mass of atoms whose sole instinct is survival.
 organization:
   name: Masaryk university
   url: https://www.muni.cz/
 social:
   - icon: envelope
     iconPack: fas
-    url: mailto:example@example.com
+    url: jakubco@phil.muni.cz
   - icon: twitter
     iconPack: fab
-    url: https://example.com/
+    url: https://twitter.com/horiacazirafa
   - icon: github
     iconPack: fab
-    url: https://example.com/
+    url: https://github.com/horiacazirafa
 
 weight: 1
 widget:
