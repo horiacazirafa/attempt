@@ -1,0 +1,223 @@
+---
+title: Trump's Sentiment Analysis
+author: Kristián Jakubčo
+date: '2021-06-01'
+slug: []
+categories: []
+tags: []
+description: ~
+toc: yes
+authors: []
+series: []
+lastmod: '2021-06-01T11:36:11+02:00'
+featuredVideo: ~
+featuredImage: ~
+---
+
+<script src="{{< blogdown/postref >}}index.en_files/header-attrs/header-attrs.js"></script>
+
+<div id="TOC">
+
+</div>
+
+<pre class="r"><code>library(tidyverse)
+library(ggthemes)
+library(dplyr)
+library(tidytext)
+library(stringr) 
+library(ggplot2) 
+data &lt;- read.csv(&quot;C:\\Users\\krist\\OneDrive\\Dokumenty\\R\\FINAL\\trump_tweets.csv&quot;) #loads the data</code></pre>
+<pre class="r"><code>trump &lt;-data[!(data$isRetweet==&quot;t&quot;), ] #deletes retweets
+trump &lt;- trump %&gt;% 
+  filter(!str_detect(text, &#39;https&#39;)) #deletes hyperlink
+
+tidy_trump &lt;- trump %&gt;%
+  mutate(line = row_number()) %&gt;% #new column &quot;line&quot; to keep track from which lines words come from  
+  unnest_tokens(word, text) %&gt;% #unnests the text into one word per row
+  anti_join(stop_words)
+
+word_freq &lt;- tidy_trump %&gt;%
+  count(word, sort = TRUE)</code></pre>
+<pre class="r"><code>library(wordcloud)
+library(RColorBrewer)
+word_freq &lt;- tidy_trump %&gt;%
+  count(word, sort = TRUE) #creates a new dataset of words and their frequencies
+word_freq &lt;- word_freq[-c(1:7), ]
+words &lt;- word_freq$word #assigns the words to a character vector
+freqs &lt;- word_freq$n #assigns the frequencies of the words to a vector of integers
+wordcloud(words = words,
+          freq = freqs, #the two vectors are used to make a wordcloud
+          max.words = 50, #sets the maximum number of words in the wordcloud
+          scale=c(2.5,.5), #adjusts the scale of the wordcloud so that all words can fit in
+          colors = brewer.pal(8, &quot;Dark2&quot;))</code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>#Trump&#39;s words with joy sentiment last year
+lastyear &lt;- tidy_trump[grepl(&quot;2020&quot;, tidy_trump$date),]
+nrc_joy &lt;- get_sentiments(&quot;nrc&quot;) %&gt;% 
+  filter(sentiment == &quot;positive&quot;)
+lastyear %&gt;%
+  inner_join(nrc_joy) %&gt;% # combining two tables together 
+  count(word, sort = TRUE) %&gt;%
+  slice_max(n, n = 20)</code></pre>
+<pre><code>##           word   n
+## 1    president 227
+## 2         vote 181
+## 3          job 157
+## 4       united 102
+## 5        white  93
+## 6        money  81
+## 7    including  65
+## 8      supreme  62
+## 9       police  60
+## 10    approval  58
+## 11   wonderful  54
+## 12        love  50
+## 13        deal  49
+## 14       enjoy  49
+## 15       mayor  43
+## 16        real  43
+## 17 immediately  42
+## 18     protect  41
+## 19      ballot  39
+## 20       guard  38</code></pre>
+<pre class="r"><code>#Trump&#39;s words with joy sentiment last year
+lastyear &lt;- tidy_trump[grepl(&quot;2020&quot;, tidy_trump$date),]
+nrc_joy &lt;- get_sentiments(&quot;nrc&quot;) %&gt;% 
+  filter(sentiment == &quot;negative&quot;)
+lastyear %&gt;%
+  inner_join(nrc_joy) %&gt;% # combining two tables together 
+  count(word, sort = TRUE) %&gt;%
+  slice_max(n, n = 20)</code></pre>
+<pre><code>##           word   n
+## 1         fake 295
+## 2         vote 181
+## 3          bad 110
+## 4      corrupt  89
+## 5        crime  87
+## 6        fraud  77
+## 7         hoax  75
+## 8        crazy  73
+## 9   government  73
+## 10 impeachment  73
+## 11       virus  62
+## 12      rating  48
+## 13        john  47
+## 14        lost  47
+## 15       wrong  47
+## 16         tax  45
+## 17       badly  42
+## 18 immediately  42
+## 19    disaster  41
+## 20        late  36</code></pre>
+<pre class="r"><code>#Sentiment analysis of Donald Trump&#39;s tweets in 2020
+library(sentimentr)
+library(tidyr)
+trump_sentiment &lt;- lastyear %&gt;%
+  inner_join(get_sentiments(&quot;bing&quot;)) %&gt;%
+  count(date, index = line %/% 80, sentiment) %&gt;%
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %&gt;% 
+  mutate(sentiment = positive - negative)
+
+#Adjusting the date format and extracting months only
+library(lubridate)
+trump_sentiment &lt;- trump_sentiment %&gt;% mutate(date = ymd_hms(date),
+                                              newdate = as_date(date),
+                                              linenumber = row_number())
+trump_sentiment &lt;- trump_sentiment %&gt;% mutate(day = format(as.Date(trump_sentiment$date, format=&quot;%Y/%m/%d&quot;), &quot;%d/%m&quot;))</code></pre>
+<pre class="r"><code>#Separate datasets for every month
+January &lt;- trump_sentiment[grepl(&quot;/01&quot;, trump_sentiment$day),]
+February &lt;- trump_sentiment[grepl(&quot;/02&quot;, trump_sentiment$day),]
+March &lt;- trump_sentiment[grepl(&quot;/03&quot;, trump_sentiment$day),]
+April &lt;- trump_sentiment[grepl(&quot;/04&quot;, trump_sentiment$day),]
+May &lt;- trump_sentiment[grepl(&quot;/05&quot;, trump_sentiment$day),]
+June &lt;- trump_sentiment[grepl(&quot;/06&quot;, trump_sentiment$day),]
+July &lt;- trump_sentiment[grepl(&quot;/07&quot;, trump_sentiment$day),]
+August &lt;- trump_sentiment[grepl(&quot;/08&quot;, trump_sentiment$day),]
+September &lt;- trump_sentiment[grepl(&quot;/09&quot;, trump_sentiment$day),]
+October &lt;- trump_sentiment[grepl(&quot;/10&quot;, trump_sentiment$day),]
+November &lt;- trump_sentiment[grepl(&quot;/11&quot;, trump_sentiment$day),]
+December &lt;- trump_sentiment[grepl(&quot;/12&quot;, trump_sentiment$day),]</code></pre>
+<pre class="r"><code>library(tidyverse)
+ ggplot(January, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;January&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre class="r"><code>library(tidyverse)
+ ggplot(February, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;February&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre class="r"><code>library(tidyverse)
+ ggplot(March, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;March&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>library(tidyverse)
+ ggplot(April, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;April&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>library(tidyverse)
+ ggplot(May, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;May&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<pre class="r"><code>library(tidyverse)
+ ggplot(June, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;June&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>library(tidyverse)
+ ggplot(July, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;July&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code>library(tidyverse)
+ ggplot(August, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;August&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<pre class="r"><code>library(tidyverse)
+ ggplot(September, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;September&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<pre class="r"><code>library(tidyverse)
+ ggplot(October, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;October&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<pre class="r"><code>library(tidyverse)
+ ggplot(November, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;November&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<pre class="r"><code>library(tidyverse)
+ ggplot(December, aes(day, sentiment, fill = ifelse(sentiment &gt; 0,&quot;positive&quot;,&quot;negative&quot;))) +
+      ggtitle(&quot;December&quot;) +
+      theme(plot.title=element_text( hjust=0.5, vjust=0.5, face=&#39;bold&#39;, margin=margin(t=40,b=-30))) +
+      geom_bar(stat=&quot;identity&quot;) +
+      scale_fill_manual(values=c(&quot;firebrick1&quot;,&quot;chartreuse3&quot;), name=&quot;Sentiment&quot;) </code></pre>
+<p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
