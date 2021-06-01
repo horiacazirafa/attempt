@@ -1,12 +1,12 @@
 ---
-title: Example Author
+title: 
 draft: false
-role: Example Role
+role: Student at
 avatar: images/icon.png
 bio: Aenean vel bibendum quam. Aliquam at mollis quam. Proin efficitur.
 organization:
-  name: Example Organization
-  url: https://example.com/
+  name: Masaryk university
+  url: https://www.muni.cz/
 social:
   - icon: envelope
     iconPack: fas
