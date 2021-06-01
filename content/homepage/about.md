@@ -2,7 +2,7 @@
 title: 
 draft: false
 role: Student at
-avatar: images/icon.png
+avatar: images/unnamed.png
 bio: An evolutionary mass of atoms whose sole instinct is survival.
 organization:
   name: Masaryk university
