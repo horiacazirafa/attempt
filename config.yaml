@@ -1,5 +1,5 @@
 baseURL: /
-title: Eureka Demo
+title: Kristián Jakubčo
 
 # Comment when installing using Hugo Modules
 theme: "hugo-eureka"
@@ -19,7 +19,7 @@ hasCJKLanguage: false # Set `true` for Chinese/Japanese/Korean.
 defaultContentLanguageInSubdir: false
 
 # Uncomment for google analytics
-# googleAnalytics: UA-123-45
+googleAnalytics: G-W3DRX9R44V
 
 markup:
   # Do not modify markup.highlight
