@@ -45,5 +45,5 @@ widget:
 
 ## Introduction
 
-Hello
+Hello world! I am a student in English literature at the department of English and American Studies at Masaryk University.
 
