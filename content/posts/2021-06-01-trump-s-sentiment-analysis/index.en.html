@@ -51,7 +51,7 @@ wordcloud(words = words,
           scale=c(2.5,.5), #adjusts the scale of the wordcloud so that all words can fit in
           colors = brewer.pal(8, &quot;Dark2&quot;))</code></pre>
 <p><img src="{{< blogdown/postref >}}index.en_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
-<pre class="r"><code>#Trump&#39;s words with joy sentiment last year
+<pre class="r"><code>#Trump&#39;s words with positive sentiment last year
 lastyear &lt;- tidy_trump[grepl(&quot;2020&quot;, tidy_trump$date),]
 nrc_joy &lt;- get_sentiments(&quot;nrc&quot;) %&gt;% 
   filter(sentiment == &quot;positive&quot;)
@@ -80,7 +80,7 @@ lastyear %&gt;%
 ## 18     protect  41
 ## 19      ballot  39
 ## 20       guard  38</code></pre>
-<pre class="r"><code>#Trump&#39;s words with joy sentiment last year
+<pre class="r"><code>#Trump&#39;s words with negative sentiment last year
 lastyear &lt;- tidy_trump[grepl(&quot;2020&quot;, tidy_trump$date),]
 nrc_joy &lt;- get_sentiments(&quot;nrc&quot;) %&gt;% 
   filter(sentiment == &quot;negative&quot;)
