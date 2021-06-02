@@ -3,7 +3,7 @@ main:
     url: /posts/
     weight: 1
   - name: CV
-    url: /posts/
+    url: /authors/
     weight: 2
   - name: Contact
     url: /docs/
