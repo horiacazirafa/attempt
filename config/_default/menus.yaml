@@ -1,6 +1,6 @@
 main:
   - name: Posts
-    url: 'posts'
+    url: '#Posts'
     weight: 1
   - name: CV
     url: /posts/
