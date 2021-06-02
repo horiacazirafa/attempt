@@ -54,7 +54,7 @@ wordcloud(words = words,
 ```
 
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
-#Trump's words with joy sentiment last year
+#Trump's words with positive sentiment last year
 lastyear <- tidy_trump[grepl("2020", tidy_trump$date),]
 nrc_joy <- get_sentiments("nrc") %>% 
   filter(sentiment == "positive")
@@ -65,7 +65,7 @@ lastyear %>%
 ```
 
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
-#Trump's words with joy sentiment last year
+#Trump's words with negative sentiment last year
 lastyear <- tidy_trump[grepl("2020", tidy_trump$date),]
 nrc_joy <- get_sentiments("nrc") %>% 
   filter(sentiment == "negative")
