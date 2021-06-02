@@ -12,7 +12,3 @@ toc: true
 ---
 
 jakubco@phil.muni.cz
-
-## Hello
-
-world
